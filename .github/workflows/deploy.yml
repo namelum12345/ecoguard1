@@ -71,7 +71,9 @@ jobs:
             echo "--- PM2 restart ---"
             pm2 describe aquaguard > /dev/null 2>&1 \
               && pm2 restart aquaguard \
-              || pm2 start backend/src/server.js --name aquaguard
+              || pm2 start backend/src/server.js \
+                   --name aquaguard \
+                   --cwd ${{ secrets.DEPLOY_PATH }}/backend
 
             pm2 save
 

@@ -5,7 +5,7 @@
 # =============================================================
 set -euo pipefail
 
-REPO_URL="https://github.com/YOUR_ORG/YOUR_REPO.git"   # << dəyişin
+REPO_URL="https://github.com/namelum12345/ecoguard1.git"
 DEPLOY_PATH="/root/polad"
 NODE_VERSION="20"
 
