@@ -1,0 +1,18 @@
+{
+  "name": "aquaguard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EcoGuard — backend + citizen frontend + admin panel monorepo",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix citizen-frontend && npm install --prefix admin-panel",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:citizen": "npm run dev --prefix citizen-frontend",
+    "dev:admin": "npm run dev --prefix admin-panel",
+    "dev": "concurrently -k -n backend,citizen,admin -c blue,green,magenta \"npm:dev:backend\" \"npm:dev:citizen\" \"npm:dev:admin\"",
+    "build": "npm run build --prefix citizen-frontend && npm run build --prefix admin-panel",
+    "start": "npm start --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

@@ -1,0 +1,78 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to ecoguard.online
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            citizen-frontend/package-lock.json
+            admin-panel/package-lock.json
+
+      - name: Install & build citizen-frontend
+        run: |
+          npm ci --prefix citizen-frontend
+          npm run build --prefix citizen-frontend
+        env:
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+
+      - name: Install & build admin-panel
+        run: |
+          npm ci --prefix admin-panel
+          npm run build --prefix admin-panel
+        env:
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+
+      - name: Copy build artifacts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "citizen-frontend/dist/,admin-panel/dist/"
+          target: ${{ secrets.DEPLOY_PATH }}
+          strip_components: 0
+
+      - name: Deploy backend & restart PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            echo "--- Git pull ---"
+            git pull origin main
+
+            echo "--- Backend dependencies ---"
+            npm ci --prefix backend
+
+            echo "--- Backend .env ---"
+            cat > backend/.env << 'ENVEOF'
+            ${{ secrets.BACKEND_ENV }}
+            ENVEOF
+
+            echo "--- PM2 restart ---"
+            pm2 describe aquaguard > /dev/null 2>&1 \
+              && pm2 restart aquaguard \
+              || pm2 start backend/src/server.js --name aquaguard
+
+            pm2 save
+
+            echo "--- Deploy uğurla tamamlandı ---"
