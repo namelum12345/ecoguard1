@@ -7,7 +7,7 @@ const String _tokenKey = 'auth_token';
 // Change this to your backend URL
 const String _apiBase = kDebugMode
     ? 'http://localhost:4100'
-    : 'https://ndu1.kiberkod.az';
+    : 'https://ecoguard.online';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
