@@ -55,7 +55,7 @@ const serveFrontends =
 if (serveFrontends) {
   const { citizenDist, adminDist } = config.paths;
 
-  app.get('/admin', (_req, res) => res.redirect(302, '/admin/'));
+  app.get(/^\/admin$/, (_req, res) => res.redirect(302, '/admin/'));
 
   app.use('/admin', express.static(adminDist));
   app.use('/admin', (req, res, next) => {
